@@ -24,13 +24,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
  * Writes double values (instead of String values) for any MDC values that can be parsed as a double,
  * except NaN and positive/negative Infinity.
  */
-public class DoubleMdcEntryWriter implements MdcEntryWriter {
+public class DoubleMdcEntryWriter extends AbstractMdcEntryWriter implements MdcEntryWriter {
 
     private static final Pattern DOUBLE_PATTERN = doublePattern();
 
     @Override
     public boolean writeMdcEntry(JsonGenerator generator, String fieldName, String mdcKey, String mdcValue) throws IOException {
-        if (shouldParse(mdcValue)) {
+        if (!mdcKeyExcluded(mdcKey) && shouldParse(mdcValue)) {
             try {
                 double parsedValue = Double.parseDouble(mdcValue);
                 generator.writeFieldName(fieldName);

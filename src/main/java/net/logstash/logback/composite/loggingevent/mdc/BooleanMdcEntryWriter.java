@@ -22,19 +22,21 @@ import com.fasterxml.jackson.core.JsonGenerator;
 /**
  * Writes boolean values (instead of String values) for any MDC values that equal "true" or "false", ignoring case.
  */
-public class BooleanMdcEntryWriter implements MdcEntryWriter {
+public class BooleanMdcEntryWriter extends AbstractMdcEntryWriter implements MdcEntryWriter {
 
     @Override
     public boolean writeMdcEntry(JsonGenerator generator, String fieldName, String mdcKey, String mdcValue) throws IOException {
-        if ("true".equalsIgnoreCase(mdcValue)) {
-            generator.writeFieldName(fieldName);
-            generator.writeBoolean(true);
-            return true;
-        }
-        if ("false".equalsIgnoreCase(mdcValue)) {
-            generator.writeFieldName(fieldName);
-            generator.writeBoolean(false);
-            return true;
+        if (!mdcKeyExcluded(mdcKey)) {
+            if ("true".equalsIgnoreCase(mdcValue)) {
+                generator.writeFieldName(fieldName);
+                generator.writeBoolean(true);
+                return true;
+            }
+            if ("false".equalsIgnoreCase(mdcValue)) {
+                generator.writeFieldName(fieldName);
+                generator.writeBoolean(false);
+                return true;
+            }
         }
 
         return false;

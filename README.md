@@ -1042,7 +1042,10 @@ Currently, MDC entry writers for the following value types are supported:
         that can be parsed as a long (radix 10).
         e.g. Writes 1234 instead of "1234"
     -->
-    <mdcEntryWriter class="net.logstash.logback.composite.loggingevent.mdc.LongMdcEntryWriter"/>
+    <mdcEntryWriter class="net.logstash.logback.composite.loggingevent.mdc.LongMdcEntryWriter">
+        <excludeMdcKey>key1_ToExclude</excludeMdcKey>
+        <excludeMdcKey>key2_ToExclude</excludeMdcKey>
+    </mdcEntryWriter>
 
     <!--
         Writes double values (instead of String values) for any MDC values
@@ -1059,6 +1062,10 @@ Currently, MDC entry writers for the following value types are supported:
     <mdcEntryWriter class="net.logstash.logback.composite.loggingevent.mdc.BooleanMdcEntryWriter"/>
 </encoder>
 ```
+The configuration element `excludeMdcKey` is optional and can be used for a `MdcEntryWriter` to exclude
+certain MDC keys from being processed by the used `MdcEntryWriters`.
+If you are using the `LongMdcEntryWriter` together with the `DoubleMdcEntryWriter` you may need to
+exclude the same key from both writers as a long value would also be recognized by the double writer.
 
 To add your own MDC entry writer for other types or apply the manipulations only for specific fields
 you can write your own implementation of [`MdcEntryWriter`](src/main/java/net/logstash/logback/composite/loggingevent/mdc/MdcEntryWriter.java).

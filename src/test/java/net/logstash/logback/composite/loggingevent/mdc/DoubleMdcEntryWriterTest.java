@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -70,6 +71,17 @@ class DoubleMdcEntryWriterTest {
     })
     void invalid(String value) throws IOException {
         boolean result = mdcEntryWriter.writeMdcEntry(generator, "otherName", "name", value);
+
+        assertThat(result).isFalse();
+        verifyNoInteractions(generator);
+    }
+
+    @Test
+    void excludeMdcKey() throws IOException {
+        DoubleMdcEntryWriter writer = new DoubleMdcEntryWriter();
+        writer.addExcludeMdcKey("excluded");
+
+        boolean result = writer.writeMdcEntry(generator, "otherName", "excluded", "value");
 
         assertThat(result).isFalse();
         verifyNoInteractions(generator);

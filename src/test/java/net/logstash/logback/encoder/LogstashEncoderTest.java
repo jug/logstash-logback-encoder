@@ -302,6 +302,7 @@ public class LogstashEncoderTest {
     public void mdcEntryWriters() throws Exception {
         Map<String, String> mdcMap = new HashMap<>();
         mdcMap.put("long", "4711");
+        mdcMap.put("excluded_long", "-4711");
         mdcMap.put("double", "2.71828");
         mdcMap.put("bool", "true");
         mdcMap.put("default", "string");
@@ -309,8 +310,13 @@ public class LogstashEncoderTest {
         LoggingEvent event = mockBasicILoggingEvent(Level.ERROR);
         event.setMDCPropertyMap(mdcMap);
 
-        encoder.addMdcEntryWriter(new LongMdcEntryWriter());
-        encoder.addMdcEntryWriter(new DoubleMdcEntryWriter());
+        LongMdcEntryWriter longMdcEntryWriter = new LongMdcEntryWriter();
+        longMdcEntryWriter.addExcludeMdcKey("excluded_long");
+        DoubleMdcEntryWriter doubleMdcEntryWriter = new DoubleMdcEntryWriter();
+        doubleMdcEntryWriter.addExcludeMdcKey("excluded_long");
+
+        encoder.addMdcEntryWriter(longMdcEntryWriter);
+        encoder.addMdcEntryWriter(doubleMdcEntryWriter);
         encoder.addMdcEntryWriter(new BooleanMdcEntryWriter());
         encoder.start();
         byte[] encoded = encoder.encode(event);
@@ -318,6 +324,7 @@ public class LogstashEncoderTest {
         JsonNode node = MAPPER.readTree(encoded);
 
         assertThat(node.get("long").longValue()).isEqualTo(4711L);
+        assertThat(node.get("excluded_long").textValue()).isEqualTo("-4711");
         assertThat(node.get("double").doubleValue()).isEqualTo(2.71828);
         assertThat(node.get("bool").booleanValue()).isTrue();
         assertThat(node.get("default").textValue()).isEqualTo("string");

@@ -22,11 +22,11 @@ import com.fasterxml.jackson.core.JsonGenerator;
 /**
  * Writes long values (instead of String values) for any MDC values that can be parsed as a long (radix 10).
  */
-public class LongMdcEntryWriter implements MdcEntryWriter {
+public class LongMdcEntryWriter extends AbstractMdcEntryWriter implements MdcEntryWriter {
 
     @Override
     public boolean writeMdcEntry(JsonGenerator generator, String fieldName, String mdcKey, String mdcValue) throws IOException {
-        if (shouldParse(mdcValue)) {
+        if (!mdcKeyExcluded(mdcKey) && shouldParse(mdcValue)) {
             try {
                 long parsedValue = Long.parseLong(mdcValue);
                 generator.writeFieldName(fieldName);

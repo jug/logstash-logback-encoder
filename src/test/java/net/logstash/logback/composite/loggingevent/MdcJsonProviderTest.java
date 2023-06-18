@@ -164,11 +164,22 @@ public class MdcJsonProviderTest {
         mdc.put("string_hex", "0xBAD");
         mdc.put("empty", "");
         mdc.put("key_null", null); // not logged
+        mdc.put("excluded_long", "-4711");
+        mdc.put("excluded_double", "-2.71828");
+        mdc.put("excluded_bool", "false");
         when(event.getMDCPropertyMap()).thenReturn(mdc);
 
-        provider.addMdcEntryWriter(new LongMdcEntryWriter());
-        provider.addMdcEntryWriter(new DoubleMdcEntryWriter());
-        provider.addMdcEntryWriter(new BooleanMdcEntryWriter());
+        LongMdcEntryWriter longMdcEntryWriter = new LongMdcEntryWriter();
+        longMdcEntryWriter.addExcludeMdcKey("excluded_long");
+        DoubleMdcEntryWriter doubleMdcEntryWriter = new DoubleMdcEntryWriter();
+        doubleMdcEntryWriter.addExcludeMdcKey("excluded_double");
+        doubleMdcEntryWriter.addExcludeMdcKey("excluded_long");
+        BooleanMdcEntryWriter booleanMdcEntryWriter = new BooleanMdcEntryWriter();
+        booleanMdcEntryWriter.addExcludeMdcKey("excluded_bool");
+
+        provider.addMdcEntryWriter(longMdcEntryWriter);
+        provider.addMdcEntryWriter(doubleMdcEntryWriter);
+        provider.addMdcEntryWriter(booleanMdcEntryWriter);
 
         provider.writeTo(generator, event);
 
@@ -184,6 +195,12 @@ public class MdcJsonProviderTest {
         verify(generator).writeObject("0xBAD");
         verify(generator).writeFieldName("empty");
         verify(generator).writeObject("");
+        verify(generator).writeFieldName("excluded_long");
+        verify(generator).writeObject("-4711");
+        verify(generator).writeFieldName("excluded_double");
+        verify(generator).writeObject("-2.71828");
+        verify(generator).writeFieldName("excluded_bool");
+        verify(generator).writeObject("false");
         verifyNoMoreInteractions(generator);
     }
 
